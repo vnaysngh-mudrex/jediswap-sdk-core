@@ -3,6 +3,7 @@ import invariant from 'tiny-invariant'
 import { checkValidAddress, validateAndParseAddress } from '../utils/validateAndParseAddress'
 import { BaseCurrency } from './baseCurrency'
 import { Currency } from './currency'
+import { ChainId } from '../chains'
 
 /**
  * Represents an ERC20 token with a unique address and some metadata.
@@ -35,7 +36,7 @@ export class Token extends BaseCurrency {
    * @param sellFeeBps Sell fee tax for FOT tokens, in basis points
    */
   public constructor(
-    chainId: number,
+    chainId: ChainId,
     address: string,
     decimals: number,
     symbol?: string,
