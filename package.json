@@ -1,5 +1,5 @@
 {
-  "name": "@uniswap/sdk-core",
+  "name": "@jediswap/sdk-core",
   "license": "MIT",
   "version": "4.0.9",
   "description": "⚒️ An SDK for building applications on top of Uniswap V3",
@@ -25,6 +25,7 @@
     "big.js": "^5.2.2",
     "decimal.js-light": "^2.5.0",
     "jsbi": "^3.1.4",
+    "starknet": "5.19.5",
     "tiny-invariant": "^1.1.0",
     "toformat": "^2.0.0"
   },
