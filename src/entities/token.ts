@@ -1,37 +1,71 @@
+import { BigNumber } from '@ethersproject/bignumber'
 import invariant from 'tiny-invariant'
-import { num, validateAndParseAddress } from 'starknet'
-import { Currency, ETHER } from './currency'
-import { ChainId } from '../chains'
+import { checkValidAddress, validateAndParseAddress } from '../utils/validateAndParseAddress'
+import { BaseCurrency } from './baseCurrency'
+import { Currency } from './currency'
+
 /**
  * Represents an ERC20 token with a unique address and some metadata.
  */
-export class Token extends Currency {
-  public readonly chainId: ChainId
+export class Token extends BaseCurrency {
+  public readonly isNative: false = false
+  public readonly isToken: true = true
+
+  /**
+   * The contract address on the chain on which this token lives
+   */
   public readonly address: string
 
+  /**
+   * Relevant for fee-on-transfer (FOT) token taxes,
+   * Not every ERC20 token is FOT token, so this field is optional
+   */
+  public readonly buyFeeBps?: BigNumber
+  public readonly sellFeeBps?: BigNumber
+
+  /**
+   *
+   * @param chainId {@link BaseCurrency#chainId}
+   * @param address The contract address on the chain on which this token lives
+   * @param decimals {@link BaseCurrency#decimals}
+   * @param symbol {@link BaseCurrency#symbol}
+   * @param name {@link BaseCurrency#name}
+   * @param bypassChecksum If true it only checks for length === 42, startsWith 0x and contains only hex characters
+   * @param buyFeeBps Buy fee tax for FOT tokens, in basis points
+   * @param sellFeeBps Sell fee tax for FOT tokens, in basis points
+   */
   public constructor(
-    chainId: ChainId,
+    chainId: number,
     address: string,
     decimals: number,
     symbol?: string,
     name?: string,
-    logoURI?: string
+    bypassChecksum?: boolean,
+    buyFeeBps?: BigNumber,
+    sellFeeBps?: BigNumber
   ) {
-    super(decimals, symbol, name, logoURI)
-    this.chainId = chainId
-    this.address = validateAndParseAddress(address).toLowerCase()
+    super(chainId, decimals, symbol, name)
+    if (bypassChecksum) {
+      this.address = checkValidAddress(address)
+    } else {
+      this.address = validateAndParseAddress(address)
+    }
+    if (buyFeeBps) {
+      invariant(buyFeeBps.gte(BigNumber.from(0)), 'NON-NEGATIVE FOT FEES')
+    }
+    if (sellFeeBps) {
+      invariant(sellFeeBps.gte(BigNumber.from(0)), 'NON-NEGATIVE FOT FEES')
+    }
+    this.buyFeeBps = buyFeeBps
+    this.sellFeeBps = sellFeeBps
   }
 
   /**
    * Returns true if the two tokens are equivalent, i.e. have the same chainId and address.
    * @param other other token to compare
    */
-  public equals(other: Token): boolean {
-    // short circuit on reference equality
-    if (this === other) {
-      return true
-    }
-    return this.chainId === other.chainId && this.address === other.address
+  public equals(other: Currency): boolean {
+    return other.isToken && this.chainId === other.chainId && this.address.toLowerCase() === other.address.toLowerCase()
   }
 
   /**
@@ -42,42 +76,14 @@ export class Token extends Currency {
    */
   public sortsBefore(other: Token): boolean {
     invariant(this.chainId === other.chainId, 'CHAIN_IDS')
-    invariant(this.address !== other.address, 'ADDRESSES')
-    const thisAddress = num.toBigInt(this.address)
-    const otherAddress = num.toBigInt(other.address)
-
-    return thisAddress < otherAddress
+    invariant(this.address.toLowerCase() !== other.address.toLowerCase(), 'ADDRESSES')
+    return this.address.toLowerCase() < other.address.toLowerCase()
   }
-}
 
-/**
- * Compares two currencies for equality
- */
-export function currencyEquals(currencyA: Currency, currencyB: Currency): boolean {
-  if (currencyA instanceof Token && currencyB instanceof Token) {
-    return currencyA.equals(currencyB)
-  } else if (currencyA instanceof Token) {
-    return false
-  } else if (currencyB instanceof Token) {
-    return false
-  } else {
-    return currencyA === currencyB
+  /**
+   * Return this token, which does not need to be wrapped
+   */
+  public get wrapped(): Token {
+    return this
   }
-}
-
-export const WETH: { [chainId in ChainId]: Token } = {
-  [ChainId.SN_GOERLI]: new Token(
-    ChainId.SN_GOERLI,
-    '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    ETHER.decimals,
-    ETHER.symbol,
-    ETHER.name
-  ),
-  [ChainId.SN_MAIN]: new Token(
-    ChainId.SN_MAIN,
-    '0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7',
-    ETHER.decimals,
-    ETHER.symbol,
-    ETHER.name
-  )
 }

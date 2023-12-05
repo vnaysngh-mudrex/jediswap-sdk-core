@@ -5,7 +5,6 @@ import { BigintIsh, Rounding } from '../../constants'
 import { Currency } from '../currency'
 import { Fraction } from './fraction'
 import { CurrencyAmount } from './currencyAmount'
-import { currencyEquals } from '../token'
 
 export class Price<TBase extends Currency, TQuote extends Currency> extends Fraction {
   public readonly baseCurrency: TBase // input i.e. denominator
@@ -56,7 +55,7 @@ export class Price<TBase extends Currency, TQuote extends Currency> extends Frac
    * @param other the other price
    */
   public multiply<TOtherQuote extends Currency>(other: Price<TQuote, TOtherQuote>): Price<TBase, TOtherQuote> {
-    invariant(currencyEquals(this.quoteCurrency, other.baseCurrency), 'TOKEN')
+    invariant(this.quoteCurrency.equals(other.baseCurrency), 'TOKEN')
     const fraction = super.multiply(other)
     return new Price(this.baseCurrency, other.quoteCurrency, fraction.denominator, fraction.numerator)
   }
@@ -66,7 +65,7 @@ export class Price<TBase extends Currency, TQuote extends Currency> extends Frac
    * @param currencyAmount the amount of base currency to quote against the price
    */
   public quote(currencyAmount: CurrencyAmount<TBase>): CurrencyAmount<TQuote> {
-    invariant(currencyEquals(currencyAmount.currency, this.baseCurrency), 'TOKEN')
+    invariant(currencyAmount.currency.equals(this.baseCurrency), 'TOKEN')
     const result = super.multiply(currencyAmount)
     return CurrencyAmount.fromFractionalAmount(this.quoteCurrency, result.numerator, result.denominator)
   }
