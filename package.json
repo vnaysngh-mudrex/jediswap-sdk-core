@@ -1,7 +1,7 @@
 {
   "name": "@vnaysn/jediswap-sdk-core",
   "license": "MIT",
-  "version": "2.3.6",
+  "version": "3.0.0",
   "description": "⚒️ An SDK for building applications on top of JediSwap V3",
   "publishConfig": {
     "access": "public"
