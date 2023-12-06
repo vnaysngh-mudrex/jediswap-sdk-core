@@ -66,7 +66,7 @@ export class Token extends BaseCurrency {
    * @param other other token to compare
    */
   public equals(other: Currency): boolean {
-    return other.isToken && this.chainId === other.chainId && this.address.toLowerCase() === other.address.toLowerCase()
+    return other.isToken && this.address.toLowerCase() === other.address.toLowerCase()
   }
 
   /**
@@ -76,7 +76,7 @@ export class Token extends BaseCurrency {
    * @throws if the tokens are on different chains
    */
   public sortsBefore(other: Token): boolean {
-    invariant(this.chainId === other.chainId, 'CHAIN_IDS')
+    // invariant(this.chainId === other.chainId, 'CHAIN_IDS')
     invariant(this.address.toLowerCase() !== other.address.toLowerCase(), 'ADDRESSES')
     return this.address.toLowerCase() < other.address.toLowerCase()
   }
