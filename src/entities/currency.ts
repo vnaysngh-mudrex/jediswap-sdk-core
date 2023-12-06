@@ -1,3 +1,4 @@
+import { NativeCurrency } from './nativeCurrency'
 import { Token } from './token'
 
-export type Currency = Token
+export type Currency = NativeCurrency | Token
