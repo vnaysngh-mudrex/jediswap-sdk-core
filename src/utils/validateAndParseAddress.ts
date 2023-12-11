@@ -1,4 +1,5 @@
 import { getAddress } from '@ethersproject/address'
+import { validateChecksumAddress } from 'starknet'
 
 /**
  * Validates an address and returns the parsed (checksummed) version of that address
@@ -20,7 +21,7 @@ const startsWith0xLen42HexRegex = /^0x[0-9a-fA-F]{40}$/
  * @param address the unchecksummed hex address
  */
 export function checkValidAddress(address: string): string {
-  if (startsWith0xLen42HexRegex.test(address)) {
+  if (validateChecksumAddress(address)) {
     return address
   }
 
