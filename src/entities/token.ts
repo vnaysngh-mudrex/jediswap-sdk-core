@@ -18,6 +18,8 @@ export class Token extends BaseCurrency {
    */
   public readonly address: string
 
+  public readonly chainId: ChainId
+
   /**
    * Relevant for fee-on-transfer (FOT) token taxes,
    * Not every ERC20 token is FOT token, so this field is optional
@@ -60,6 +62,7 @@ export class Token extends BaseCurrency {
     }
     this.buyFeeBps = buyFeeBps
     this.sellFeeBps = sellFeeBps
+    this.chainId = chainId
   }
 
   /**
@@ -67,7 +70,7 @@ export class Token extends BaseCurrency {
    * @param other other token to compare
    */
   public equals(other: Currency): boolean {
-    return other.isToken && this.address.toLowerCase() === other.address.toLowerCase()
+    return this.chainId === other.chainId && other.isToken && this.address.toLowerCase() === other.address.toLowerCase()
   }
 
   /**
